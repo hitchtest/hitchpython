@@ -1,0 +1,6 @@
+setup.cfg
+*.kate-swp
+*.pyc
+build/
+dist/
+hitchpython.egg-info/
