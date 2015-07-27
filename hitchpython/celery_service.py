@@ -4,10 +4,10 @@ import shutil
 import os
 import sys
 
-# TODO : Separate out python specific stuff to a parent class. Also specify version of python there?
+# TODO : Separate out python specific stuff like code coverage to a parent class.
 
 class CeleryService(Service):
-    def __init__(self, version, python, beat=False, app=None, loglevel="INFO", concurrency=2, broker=None, **kwargs):
+    def __init__(self, version, python, app, beat=False, loglevel="INFO", concurrency=2, broker=None, **kwargs):
         self.version = version
         self.python = python
         self.app = app

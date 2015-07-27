@@ -7,12 +7,13 @@ import sys
 import os
 
 # TODO : Python service with lines of code covered, etc.
-# TODO : Django fixtures + django settings fixtures.
 # TODO : Handle runserver_plus?
 # TODO : Add options that you can run with runserver.
 
 class DjangoService(Service):
-    def __init__(self, version, python, port=18080, managepy=None, settings=None, fixtures=None, verbosity=1, sites=True, migrations=True, **kwargs):
+    def __init__(self, version, python, port=18080, managepy=None,
+                 settings=None, fixtures=None, verbosity=1,
+                 sites=True, syncdb=False, migrations=True, **kwargs):
         self.version = version
         self.python = python
         self.verbosity = verbosity if 0 <= verbosity <= 3 else 1
@@ -20,6 +21,7 @@ class DjangoService(Service):
         self.django_fixtures = [] if fixtures is None else fixtures
         self.settings = settings
         self.migrations = migrations
+        self.syncdb = syncdb
         self.sites = sites
         self.managepy = managepy
         self.settings_option = [] if settings is None else ['--settings=' + settings, ]
@@ -61,9 +63,9 @@ class DjangoService(Service):
         if self.version not in version_output:
             raise RuntimeError("Django version needed is {}, output is {}.".format(self.version, version_output))
 
-        # TODO: For earlier version than 1.8, run syncdb
-        #self.log("Syncing database...")
-        #self.manage("syncdb", "--noinput").run()
+        if self.syncdb:
+            self.log("Running syncdb on database...")
+            self.manage("syncdb", "--noinput").run()
         if self.migrations:
             self.log("Running migrations...")
             self.manage("migrate").run()
