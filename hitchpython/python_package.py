@@ -42,12 +42,12 @@ class PythonPackage(HitchPackage):
 
     def build(self):
         """Download and compile the specified version of python."""
+        self.base_python_bin_directory = path.join(self.build_directory, "bin")
         if not path.exists(self.build_directory):
             python_build.build.python_build(self.python_version, self.build_directory)
             call([path.join(self.base_python_bin_directory, "easy_install"), "--upgrade", "setuptools"])
             call([path.join(self.base_python_bin_directory, "easy_install"), "--upgrade", "pip"])
             call([path.join(self.base_python_bin_directory, "pip"), "install", "virtualenv", "-U"])
-        self.base_python_bin_directory = path.join(self.build_directory, "bin")
         if not path.exists(self.directory):
             call([path.join(self.base_python_bin_directory, "virtualenv"), self.directory])
         self.bin_directory = path.join(self.directory, "bin")
