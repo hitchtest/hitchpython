@@ -28,9 +28,13 @@ class PythonPackage(HitchPackage):
         self.python_version = self.check_version(
             python_version, self.PYTHON_VERSIONS, ISSUES_URL, name="Python"
         )
-
+        self.build_directory = path.join(
+            self.get_build_directory(), "python{}".format(self.python_version)
+        )
         if directory is None:
-            self.directory = path.join(self.get_build_directory(), "python{}".format(self.python_version))
+            self.directory = path.join(
+                utils.get_hitch_directory(), "py{}".format(python_version)
+            )
         else:
             self.directory = directory
         self.bin_directory = bin_directory
@@ -38,8 +42,14 @@ class PythonPackage(HitchPackage):
 
     def build(self):
         """Download and compile the specified version of python."""
+        if not path.exists(self.build_directory):
+            python_build.build.python_build(self.python_version, self.build_directory)
+            self.base_python_bin_directory = path.join(self.build_directory, "bin")
+            call([path.join(self.base_python_bin_directory, "easy_install"), "--upgrade", "setuptools"])
+            call([path.join(self.base_python_bin_directory, "easy_install"), "--upgrade", "pip"])
+            call([path.join(self.base_python_bin_directory, "pip"), "install", "virtualenv", "-U"])
         if not path.exists(self.directory):
-            python_build.build.python_build(self.python_version, self.directory)
+            call([self.base_python_bin_directory, "virtualenv", self.directory])
         self.bin_directory = path.join(self.directory, "bin")
 
     def verify(self):
@@ -48,7 +58,9 @@ class PythonPackage(HitchPackage):
 
         if self.python_version not in output:
             raise RuntimeError(
-                "python --version returned '{}', expecting version '{}'".format(output, self.python_version)
+                "python --version returned '{}', expecting version '{}'".format(
+                    output, self.python_version
+                )
             )
 
     @property
