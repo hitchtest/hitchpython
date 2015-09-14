@@ -24,7 +24,7 @@ class PythonPackage(HitchPackage):
         '3.3.1', '3.3.2', '3.3.3', '3.3.4', '3.3.5', '3.3.6',
         '3.4.0',
         #'3.4-dev',
-        '3.4.1', '3.4.2', '3.4.3', '3.5.0b1', '3.5.0b2', '3.5.0b3', '3.5-dev',
+        '3.4.1', '3.4.2', '3.4.3', '3.5.0', '3.5-dev',
     ]
 
     def __init__(self, python_version="2.7.10", directory=None, bin_directory=None):
