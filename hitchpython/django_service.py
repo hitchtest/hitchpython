@@ -1,3 +1,4 @@
+from hitchtest.environment import checks
 from hitchserve import Service
 import contextlib
 import subprocess
@@ -25,6 +26,7 @@ class DjangoService(Service):
         self.sites = sites
         self.managepy = managepy
         self.settings_option = [] if settings is None else ['--settings=' + settings, ]
+        checks.freeports([port, ])
         kwargs['log_line_ready_checker'] = lambda line: "Quit the server with CONTROL-C." in line
         super(DjangoService, self).__init__(**kwargs)
 
