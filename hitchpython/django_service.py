@@ -42,7 +42,7 @@ class DjangoService(Service):
         if self._command is None:
             return [
                 self.python, "-u", self.managepy, 'runserver', str(self.port),
-                '--verbosity', str(self.verbosity), '--noreload',
+                '--verbosity', str(self.verbosity), '--noreload', "--nothreading",
             ] + self.settings_option
         else:
             return self._command
