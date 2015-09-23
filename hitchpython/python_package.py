@@ -46,7 +46,7 @@ class PythonPackage(HitchPackage):
         checks.packages([
             "libreadline6", "libreadline6-dev", "zlib1g-dev", "libxml2", "libxml2-dev",
             "build-essential", "libssl-dev", "libbz2-dev", "libsqlite3-dev", "sqlite3",
-            "libtool",
+            "libtool", "patch",
         ])
         self.bin_directory = bin_directory
 
