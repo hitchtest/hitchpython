@@ -12,15 +12,16 @@ import os
 # TODO : Add options that you can run with runserver.
 
 class DjangoService(Service):
-    def __init__(self, version, python, port=18080, managepy=None,
+    def __init__(self, python, version=None, port=18080, managepy=None,
                  settings=None, fixtures=None, verbosity=1,
-                 sites=True, syncdb=False, migrations=True, **kwargs):
+                 sites=True, syncdb=False, makemigrations=False, migrations=True, **kwargs):
         self.version = version
         self.python = python
         self.verbosity = verbosity if 0 <= verbosity <= 3 else 1
         self.port = port
         self.django_fixtures = [] if fixtures is None else fixtures
         self.settings = settings
+        self.makemigrations = makemigrations
         self.migrations = migrations
         self.syncdb = syncdb
         self.sites = sites
@@ -60,14 +61,18 @@ class DjangoService(Service):
 
     def setup(self):
         os.chdir(self.directory)
-        self.log("Checking Django version...")
-        version_output = self.subcommand(self.python, "-c", "import django; print(django.get_version())").run(check_output=True)
-        if self.version not in version_output:
-            raise RuntimeError("Django version needed is {}, output is {}.".format(self.version, version_output))
+        if self.version is not None:
+            self.log("Checking Django version...")
+            version_output = self.subcommand(self.python, "-c", "import django; print(django.get_version())").run(check_output=True)
+            if self.version not in version_output:
+                raise RuntimeError("Django version needed is {}, output is {}.".format(self.version, version_output))
 
         if self.syncdb:
             self.log("Running syncdb on database...")
             self.manage("syncdb", "--noinput").run()
+        if self.makemigrations:
+            self.log("Running makemigrations...")
+            self.manage("makemigrations").run()
         if self.migrations:
             self.log("Running migrations...")
             self.manage("migrate").run()
