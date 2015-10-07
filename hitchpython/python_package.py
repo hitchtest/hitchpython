@@ -1,10 +1,15 @@
-from subprocess import call, check_output, PIPE, STDOUT
+from subprocess import CalledProcessError, call, check_output, check_call, PIPE, STDOUT
 from os import chdir, makedirs, getcwd, path
 from hitchtest import HitchPackage, utils
 from hitchtest.environment import checks
 import python_build
 import shutil
 import sys
+
+
+class HitchPythonBuildError(Exception):
+    pass
+
 
 ISSUES_URL = "http://github.com/hitchtest/hitchpython/issues"
 
@@ -33,7 +38,7 @@ class PythonPackage(HitchPackage):
         self.python_version = self.check_version(
             python_version, self.PYTHON_VERSIONS, ISSUES_URL, name="Python"
         )
-        self.build_directory = path.join(
+        self.base_python_main_directory = path.join(
             self.get_build_directory(), "python{}".format(self.python_version)
         )
         if directory is None:
@@ -51,15 +56,35 @@ class PythonPackage(HitchPackage):
 
 
     def build(self):
-        """Download and compile the specified version of python."""
-        self.base_python_bin_directory = path.join(self.build_directory, "bin")
-        if not path.exists(self.build_directory):
-            python_build.build.python_build(self.python_version, self.build_directory)
-            call([path.join(self.base_python_bin_directory, "easy_install"), "--upgrade", "setuptools"])
-            call([path.join(self.base_python_bin_directory, "easy_install"), "--upgrade", "pip"])
-            call([path.join(self.base_python_bin_directory, "pip"), "install", "virtualenv", "-U"])
-        if not path.exists(self.directory):
-            call([path.join(self.base_python_bin_directory, "virtualenv"), self.directory])
+        """Download and compile the specified version of python and create virtualenv from it."""
+        try:
+            self.base_python_bin_directory = path.join(self.base_python_main_directory, "bin")
+            if not path.exists(self.base_python_main_directory):
+                python_build.build.python_build(self.python_version, self.base_python_main_directory)
+                check_call([path.join(self.base_python_bin_directory, "easy_install"), "--upgrade", "setuptools"])
+                check_call([path.join(self.base_python_bin_directory, "easy_install"), "--upgrade", "pip"])
+                check_call([path.join(self.base_python_bin_directory, "pip"), "install", "virtualenv", "-U"])
+
+                # If an earlier run with a previous .hitchpkg python created the virtualenv, blow it away
+                if path.exists(self.directory):
+                    shutil.rmtree(self.directory)
+
+            # If virtualenv doesn't exist yet, create it.
+            if not path.exists(self.directory):
+                check_call([path.join(self.base_python_bin_directory, "virtualenv"), self.directory])
+        except (CalledProcessError, KeyboardInterrupt):
+            if path.exists(self.base_python_main_directory):
+                shutil.rmtree(self.base_python_main_directory)
+            if path.exists(self.directory):
+                shutil.rmtree(self.directory)
+            raise HitchPythonBuildError((
+                "Error occurred when trying to build python.\n"
+                "If the cause is not obvious, please raise an issue at "
+                "https://github.com/hitchtest/hitchpython/issues detailing:\n"
+                "Your OS, OS version and package manager. Please also copy and paste everything "
+                "above this exception."
+            ))
+
         self.bin_directory = path.join(self.directory, "bin")
 
     def verify(self):
