@@ -14,7 +14,7 @@ def read(*parts):
     return codecs.open(os.path.join(os.path.abspath(os.path.dirname(__file__)), *parts), 'r').read()
 
 setup(name="hitchpython",
-      version="0.4.0",
+      version="0.5.0",
       description="Hitch plug-in to test python programs, including Celery and Django.",
       long_description=read('README.rst'),
       classifiers=[
