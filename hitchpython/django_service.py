@@ -15,6 +15,21 @@ class DjangoService(Service):
     def __init__(self, python, version=None, port=18080, managepy=None,
                  settings=None, fixtures=None, verbosity=1,
                  sites=True, syncdb=False, makemigrations=False, migrations=True, **kwargs):
+        """Create a Django service to feed to a hitchserve ServiceBundle to run.
+
+        Args:
+            python (Required[string]): Python executable to use (e.g. /usr/bin/python).
+            version (Optional[string]): Fail if version specified is not the one being run (DEPRECATED).
+            port (Optional[number]): Port to run Django on. Default is 18080.
+            managepy (Optional[string]): Location of manage.py (default is in current directory)
+            settings (Optional[string]): settings to use (default is not to specify and to use django default)
+            fixtures (Optional[List[string]]): list of fixtures to install.
+            verbosity (Optional[number]): Verbosity to run Django with. Default is 1.
+            sites (Optional[boolean]): Install 127.0.0.1:port in the sites table. Default is False.
+            syncdb (Optional[boolean]): Run syncdb before running. Default is False.
+            makemigrations (Optional[boolean]): Run makemigrations before running. Default is False.
+            migrations (Optional[boolean]): Run migrations before running. Default is False.
+        """
         self.version = version
         self.python = python
         self.verbosity = verbosity if 0 <= verbosity <= 3 else 1
